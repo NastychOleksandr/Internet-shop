@@ -32,7 +32,7 @@ namespace OnlineStore
                         break;
 
                     case "2":
-                        Console.WriteLine("Пункт «Табулювання» поки в розробці.");
+                        ShowDiscountTable();
                         Pause();
                         break;
 
@@ -74,6 +74,28 @@ namespace OnlineStore
             Console.WriteLine("  6. кількість на складі (int)    — доступний залишок");
             Console.WriteLine("  7. чи в наявності      (bool)   — статус доступності (так/ні)");
             Console.WriteLine("\nПідсумкова величина: загальна вартість товарів з урахуванням знижок.");
+        }
+
+        static void ShowDiscountTable()
+        {
+            double basePricePerKg = 450.00;
+            double fromWeight = 0.5;
+            double toWeight = 5.0;
+            double step = 0.5;
+
+            Console.WriteLine($"Табулювання вартості замовлення (базова ціна: {basePricePerKg:F2} грн/кг)");
+            Console.WriteLine("Знижка зростає на 2% за кожен кілограм ваги.\n");
+
+            Console.WriteLine($"{"Вага (кг)",12} | {"Вартість (грн)",16}");
+            Console.WriteLine(new string('-', 32));
+
+            for (double weight = fromWeight; weight <= toWeight + 1e-9; weight += step)
+            {
+                double discountPercent = weight * 2.0;
+                double totalCost = weight * basePricePerKg * (1.0 - discountPercent / 100.0);
+
+                Console.WriteLine($"{weight,12:F2} | {totalCost,16:F2}");
+            }
         }
     }
 }
