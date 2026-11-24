@@ -27,7 +27,7 @@ namespace OnlineStore
                 switch (choice)
                 {
                     case "1":
-                        Console.WriteLine("Пункт «Довідка» поки в розробці.");
+                        ShowAbout();
                         Pause();
                         break;
 
@@ -59,6 +59,21 @@ namespace OnlineStore
             Console.WriteLine("\nНатисніть будь-яку клавішу для повернення в меню...");
             Console.ReadKey(true);
             Console.Clear();
+        }
+
+        static void ShowAbout()
+        {
+            Console.WriteLine("Тема проєкту: №14. Інтернет-магазин");
+            Console.WriteLine("Сутності: Користувач, Товар (головна), Категорія (довідник).");
+            Console.WriteLine("\nПоля головної сутності «Товар» (7 полів):");
+            Console.WriteLine("  1. артикул             (string) — унікальний код товару");
+            Console.WriteLine("  2. назва               (string) — найменування товару");
+            Console.WriteLine("  3. код категорії       (int)    — посилання на довідник категорій");
+            Console.WriteLine("  4. ціна                (double) — базова ціна за одиницю (грн)");
+            Console.WriteLine("  5. знижка              (double) — відсоток знижки (0..100%)");
+            Console.WriteLine("  6. кількість на складі (int)    — доступний залишок");
+            Console.WriteLine("  7. чи в наявності      (bool)   — статус доступності (так/ні)");
+            Console.WriteLine("\nПідсумкова величина: загальна вартість товарів з урахуванням знижок.");
         }
     }
 }
