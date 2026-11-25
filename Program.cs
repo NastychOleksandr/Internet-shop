@@ -38,19 +38,20 @@ namespace OnlineStore
 
                 switch (choice)
                 {
-                    case "1": AddProduct(); Pause(); break;
-                    case "2": SeedSampleProducts(); Pause(); break;
-                    case "3": ShowAbout(); Pause(); break;
-                    case "4": ShowDiscountTable(); Pause(); break;
-                    case "5": ShowSalesMatrix(); Pause(); break;
-                    case "6":
+                    case "1": ShowAllProducts(); Pause(); break;
+                    case "2": AddProduct(); Pause(); break;
+                    case "3": SeedSampleProducts(); Pause(); break;
+                    case "4": ShowAbout(); Pause(); break;
+                    case "5": ShowDiscountTable(); Pause(); break;
+                    case "6": ShowSalesMatrix(); Pause(); break;
+                    case "7":
                         double val = ReadDouble("Введіть значення ціни (0..1000000): ", 0, 1000000);
                         AddSeriesValue(priceSeries, ref seriesCount, val, Capacity);
                         Console.WriteLine($"Лічильник у Main: {seriesCount}");
                         Pause();
                         break;
-                    case "7": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
-                    case "8":
+                    case "8": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
+                    case "9":
                         if (seriesCount <= 0)
                         {
                             Console.WriteLine("Масив порожній, видаляти нічого.");
@@ -63,8 +64,8 @@ namespace OnlineStore
                         }
                         Pause();
                         break;
-                    case "9": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
-                    case "10": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
+                    case "10": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
+                    case "11": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
                     case "0": running = false; Console.WriteLine("Роботу завершено. До побачення!"); break;
                     default: Console.WriteLine("Немає такого пункту меню. Спробуйте ще раз."); Pause(); break;
                 }
@@ -74,16 +75,17 @@ namespace OnlineStore
         static void ShowMenu()
         {
             Console.WriteLine("=== Інтернет-магазин ===");
-            Console.WriteLine("1 — додати запис (товар)");
-            Console.WriteLine("2 — заповнити тестовими записами");
-            Console.WriteLine("3 — довідка про предметну область");
-            Console.WriteLine("4 — табулювання вартості замовлення зі знижкою");
-            Console.WriteLine("5 — зведена таблиця продажів за категоріями та днями");
-            Console.WriteLine("6 — [ЛР9] додати значення у масив");
-            Console.WriteLine("7 — [ЛР9] показати масив значень");
-            Console.WriteLine("8 — [ЛР9] видалити елемент за номером");
-            Console.WriteLine("9 — [ЛР9] показати статистику масиву");
-            Console.WriteLine("10 — [ЛР9] дослід: значимий та посилальний типи");
+            Console.WriteLine("1 — показати всі записи");
+            Console.WriteLine("2 — додати запис");
+            Console.WriteLine("3 — заповнити тестовими записами");
+            Console.WriteLine("4 — довідка про предметну область");
+            Console.WriteLine("5 — табулювання вартості замовлення зі знижкою");
+            Console.WriteLine("6 — зведена таблиця продажів за категоріями та днями");
+            Console.WriteLine("7 — [ЛР9] додати значення у масив");
+            Console.WriteLine("8 — [ЛР9] показати масив значень");
+            Console.WriteLine("9 — [ЛР9] видалити елемент за номером");
+            Console.WriteLine("10 — [ЛР9] показати статистику масиву");
+            Console.WriteLine("11 — [ЛР9] дослід: значимий та посилальний типи");
             Console.WriteLine("0 — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -263,6 +265,34 @@ namespace OnlineStore
             }
 
             return total;
+        }
+
+        static void ShowAllProducts()
+        {
+            if (count == 0)
+            {
+                Console.WriteLine("Записів поки немає.");
+                return;
+            }
+
+            Console.WriteLine(
+                $"{"ID",4} {"Артикул",-9} {"Назва",-23} {"Кат.",4} {"Ціна",10} {"Зниж.",7} {"Склад",6} {"Наявн.",7}"
+            );
+            Console.WriteLine(new string('-', 76));
+
+            for (int i = 0; i < count; i++)
+            {
+                string availability = inStockFlags[i] ? "так" : "ні";
+                Console.WriteLine(
+                    $"{ids[i],4} {articles[i],-9} {names[i],-23} {categoryIds[i],4} {prices[i],10:F2} {discounts[i],6:F1}% {stockQuantities[i],6} {availability,7}"
+                );
+            }
+
+            double totalStockValue = CalculateTotalStockValue(prices, discounts, stockQuantities, count);
+
+            Console.WriteLine(new string('-', 76));
+            Console.WriteLine($"Записів: {count}.");
+            Console.WriteLine($"Загальна вартість товарів на складі зі знижкою: {totalStockValue:F2} грн.");
         }
 
         static double CalculateDiscountedCost(double weight, double basePricePerKg)
