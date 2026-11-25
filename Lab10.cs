@@ -1,4 +1,6 @@
-﻿using System;
+//комміти зазначені, але привязані до файлу Program.cs, в історії якщо перейти на нижній пункт де вказано що переіменовано то 3 названі комміти будуть належати цьому коду.
+
+using System;
 using System.Globalization;
 using System.Text;
 
