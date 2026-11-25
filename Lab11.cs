@@ -42,18 +42,20 @@ namespace OnlineStore
                     case "2": AddProduct(); Pause(); break;
                     case "3": SearchByNameSubstring(); Pause(); break;
                     case "4": SearchByPriceRange(); Pause(); break;
-                    case "5": SeedSampleProducts(); Pause(); break;
-                    case "6": ShowAbout(); Pause(); break;
-                    case "7": ShowDiscountTable(); Pause(); break;
-                    case "8": ShowSalesMatrix(); Pause(); break;
-                    case "9":
+                    case "5": EditProductById(); Pause(); break;
+                    case "6": DeleteProductById(); Pause(); break;
+                    case "7": SeedSampleProducts(); Pause(); break;
+                    case "8": ShowAbout(); Pause(); break;
+                    case "9": ShowDiscountTable(); Pause(); break;
+                    case "10": ShowSalesMatrix(); Pause(); break;
+                    case "11":
                         double val = ReadDouble("Введіть значення ціни (0..1000000): ", 0, 1000000);
                         AddSeriesValue(priceSeries, ref seriesCount, val, Capacity);
                         Console.WriteLine($"Лічильник у Main: {seriesCount}");
                         Pause();
                         break;
-                    case "10": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
-                    case "11":
+                    case "12": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
+                    case "13":
                         if (seriesCount <= 0)
                         {
                             Console.WriteLine("Масив порожній, видаляти нічого.");
@@ -66,8 +68,8 @@ namespace OnlineStore
                         }
                         Pause();
                         break;
-                    case "12": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
-                    case "13": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
+                    case "14": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
+                    case "15": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
                     case "0": running = false; Console.WriteLine("Роботу завершено. До побачення!"); break;
                     default: Console.WriteLine("Немає такого пункту меню. Спробуйте ще раз."); Pause(); break;
                 }
@@ -81,15 +83,17 @@ namespace OnlineStore
             Console.WriteLine("2 — додати запис");
             Console.WriteLine("3 — знайти за частиною назви");
             Console.WriteLine("4 — знайти за діапазоном ціни");
-            Console.WriteLine("5 — заповнити тестовими записами");
-            Console.WriteLine("6 — довідка про предметну область");
-            Console.WriteLine("7 — табулювання вартості замовлення зі знижкою");
-            Console.WriteLine("8 — зведена таблиця продажів за категоріями та днями");
-            Console.WriteLine("9 — [ЛР9] додати значення у масив");
-            Console.WriteLine("10 — [ЛР9] показати масив значень");
-            Console.WriteLine("11 — [ЛР9] видалити елемент за номером");
-            Console.WriteLine("12 — [ЛР9] показати статистику масиву");
-            Console.WriteLine("13 — [ЛР9] дослід: значимий та посилальний типи");
+            Console.WriteLine("5 — змінити запис за номером");
+            Console.WriteLine("6 — видалити запис за номером");
+            Console.WriteLine("7 — заповнити тестовими записами");
+            Console.WriteLine("8 — довідка про предметну область");
+            Console.WriteLine("9 — табулювання вартості замовлення зі знижкою");
+            Console.WriteLine("10 — зведена таблиця продажів за категоріями та днями");
+            Console.WriteLine("11 — [ЛР9] додати значення у масив");
+            Console.WriteLine("12 — [ЛР9] показати масив значень");
+            Console.WriteLine("13 — [ЛР9] видалити елемент за номером");
+            Console.WriteLine("14 — [ЛР9] показати статистику масиву");
+            Console.WriteLine("15 — [ЛР9] дослід: значимий та посилальний типи");
             Console.WriteLine("0 — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -293,6 +297,159 @@ namespace OnlineStore
 
             Console.WriteLine(new string('-', 76));
             Console.WriteLine($"Знайдено записів у діапазоні: {found}.");
+        }
+
+        static void EditProductById()
+        {
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє, змінювати нічого.");
+                return;
+            }
+
+            int targetId = ReadInt("Введіть ID товару для редагування: ", 1, int.MaxValue);
+            int index = FindIndexById(targetId);
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Запис із ID {targetId} не знайдено.");
+                return;
+            }
+
+            Console.WriteLine($"Редагування товару №{ids[index]} (порожній Enter залишає поточне значення):");
+
+            Console.Write($"Артикул [{articles[index]}]: ");
+            string articleInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(articleInput))
+            {
+                articles[index] = articleInput.Trim();
+            }
+
+            Console.Write($"Назва [{names[index]}]: ");
+            string nameInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(nameInput))
+            {
+                names[index] = nameInput.Trim();
+            }
+
+            while (true)
+            {
+                Console.Write($"Код категорії [{categoryIds[index]}] (1..20): ");
+                string catInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(catInput)) break;
+                if (int.TryParse(catInput.Trim(), out int catVal) && catVal >= 1 && catVal <= 20)
+                {
+                    categoryIds[index] = catVal;
+                    break;
+                }
+                Console.WriteLine("Помилка: введіть ціле число від 1 до 20 або натисніть Enter.");
+            }
+
+            while (true)
+            {
+                Console.Write($"Ціна [{prices[index]:F2}] (0.01..1000000): ");
+                string priceInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(priceInput)) break;
+                string normPrice = priceInput.Trim().Replace(',', '.');
+                if (double.TryParse(normPrice, NumberStyles.Float, CultureInfo.InvariantCulture, out double priceVal)
+                    && priceVal >= 0.01 && priceVal <= 1000000.0)
+                {
+                    prices[index] = priceVal;
+                    break;
+                }
+                Console.WriteLine("Помилка: введіть число від 0.01 до 1000000 або натисніть Enter.");
+            }
+
+            while (true)
+            {
+                Console.Write($"Знижка [{discounts[index]:F1}%] (0..100): ");
+                string discInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(discInput)) break;
+                string normDisc = discInput.Trim().Replace(',', '.');
+                if (double.TryParse(normDisc, NumberStyles.Float, CultureInfo.InvariantCulture, out double discVal)
+                    && discVal >= 0.0 && discVal <= 100.0)
+                {
+                    discounts[index] = discVal;
+                    break;
+                }
+                Console.WriteLine("Помилка: введіть число від 0 до 100 або натисніть Enter.");
+            }
+
+            while (true)
+            {
+                Console.Write($"Кількість на складі [{stockQuantities[index]}] (0..100000): ");
+                string stockInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(stockInput)) break;
+                if (int.TryParse(stockInput.Trim(), out int stockVal) && stockVal >= 0 && stockVal <= 100000)
+                {
+                    stockQuantities[index] = stockVal;
+                    break;
+                }
+                Console.WriteLine("Помилка: введіть ціле число від 0 до 100000 або натисніть Enter.");
+            }
+
+            string currentAvail = inStockFlags[index] ? "так" : "ні";
+            while (true)
+            {
+                Console.Write($"Чи в наявності [{currentAvail}] (так/ні): ");
+                string availInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(availInput)) break;
+                string normAvail = availInput.Trim().ToLower();
+                if (normAvail == "так" || normAvail == "т" || normAvail == "yes" || normAvail == "y")
+                {
+                    inStockFlags[index] = true;
+                    break;
+                }
+                if (normAvail == "ні" || normAvail == "н" || normAvail == "no" || normAvail == "n")
+                {
+                    inStockFlags[index] = false;
+                    break;
+                }
+                Console.WriteLine("Помилка: введіть «так», «ні» або натисніть Enter.");
+            }
+
+            Console.WriteLine($"Запис №{ids[index]} оновлено.");
+        }
+
+        static void DeleteProductById()
+        {
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє, видаляти нічого.");
+                return;
+            }
+
+            int targetId = ReadInt("Введіть ID товару для видалення: ", 1, int.MaxValue);
+            int index = FindIndexById(targetId);
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Запис із ID {targetId} не знайдено.");
+                return;
+            }
+
+            Console.Write($"Справді видалити запис №{ids[index]} ({names[index]})? (так/ні): ");
+            string confirm = Console.ReadLine();
+            if (confirm == null || confirm.Trim().ToLower() != "так")
+            {
+                Console.WriteLine("Видалення скасовано.");
+                return;
+            }
+
+            for (int i = index; i < count - 1; i++)
+            {
+                ids[i] = ids[i + 1];
+                articles[i] = articles[i + 1];
+                names[i] = names[i + 1];
+                categoryIds[i] = categoryIds[i + 1];
+                prices[i] = prices[i + 1];
+                discounts[i] = discounts[i + 1];
+                stockQuantities[i] = stockQuantities[i + 1];
+                inStockFlags[i] = inStockFlags[i + 1];
+            }
+
+            count--;
+            Console.WriteLine($"Запис №{targetId} видалено. Залишилось записів: {count}.");
         }
 
         static void AddProduct()
