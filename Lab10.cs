@@ -44,18 +44,19 @@ namespace OnlineStore
                     case "4": SearchByPriceRange(); Pause(); break;
                     case "5": EditProductById(); Pause(); break;
                     case "6": DeleteProductById(); Pause(); break;
-                    case "7": SeedSampleProducts(); Pause(); break;
-                    case "8": ShowAbout(); Pause(); break;
-                    case "9": ShowDiscountTable(); Pause(); break;
-                    case "10": ShowSalesMatrix(); Pause(); break;
-                    case "11":
+                    case "7": ShowProductSummary(); Pause(); break;
+                    case "8": SeedSampleProducts(); Pause(); break;
+                    case "9": ShowAbout(); Pause(); break;
+                    case "10": ShowDiscountTable(); Pause(); break;
+                    case "11": ShowSalesMatrix(); Pause(); break;
+                    case "12":
                         double val = ReadDouble("Введіть значення ціни (0..1000000): ", 0, 1000000);
                         AddSeriesValue(priceSeries, ref seriesCount, val, Capacity);
                         Console.WriteLine($"Лічильник у Main: {seriesCount}");
                         Pause();
                         break;
-                    case "12": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
-                    case "13":
+                    case "13": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
+                    case "14":
                         if (seriesCount <= 0)
                         {
                             Console.WriteLine("Масив порожній, видаляти нічого.");
@@ -68,8 +69,8 @@ namespace OnlineStore
                         }
                         Pause();
                         break;
-                    case "14": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
-                    case "15": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
+                    case "15": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
+                    case "16": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
                     case "0": running = false; Console.WriteLine("Роботу завершено. До побачення!"); break;
                     default: Console.WriteLine("Немає такого пункту меню. Спробуйте ще раз."); Pause(); break;
                 }
@@ -85,15 +86,16 @@ namespace OnlineStore
             Console.WriteLine("4 — знайти за діапазоном ціни");
             Console.WriteLine("5 — змінити запис за номером");
             Console.WriteLine("6 — видалити запис за номером");
-            Console.WriteLine("7 — заповнити тестовими записами");
-            Console.WriteLine("8 — довідка про предметну область");
-            Console.WriteLine("9 — табулювання вартості замовлення зі знижкою");
-            Console.WriteLine("10 — зведена таблиця продажів за категоріями та днями");
-            Console.WriteLine("11 — [ЛР9] додати значення у масив");
-            Console.WriteLine("12 — [ЛР9] показати масив значень");
-            Console.WriteLine("13 — [ЛР9] видалити елемент за номером");
-            Console.WriteLine("14 — [ЛР9] показати статистику масиву");
-            Console.WriteLine("15 — [ЛР9] дослід: значимий та посилальний типи");
+            Console.WriteLine("7 — підсумки");
+            Console.WriteLine("8 — заповнити тестовими записами");
+            Console.WriteLine("9 — довідка про предметну область");
+            Console.WriteLine("10 — табулювання вартості замовлення зі знижкою");
+            Console.WriteLine("11 — зведена таблиця продажів за категоріями та днями");
+            Console.WriteLine("12 — [ЛР9] додати значення у масив");
+            Console.WriteLine("13 — [ЛР9] показати масив значень");
+            Console.WriteLine("14 — [ЛР9] видалити елемент за номером");
+            Console.WriteLine("15 — [ЛР9] показати статистику масиву");
+            Console.WriteLine("16 — [ЛР9] дослід: значимий та посилальний типи");
             Console.WriteLine("0 — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -450,6 +452,80 @@ namespace OnlineStore
 
             count--;
             Console.WriteLine($"Запис №{targetId} видалено. Залишилось записів: {count}.");
+        }
+
+        static bool CalculateProductSummary(
+            out int totalRecords,
+            out double discountedStockTotal,
+            out double maxPrice,
+            out int maxPriceRecordId,
+            out double minPrice,
+            out int minPriceRecordId,
+            out double averagePrice)
+        {
+            totalRecords = count;
+            discountedStockTotal = 0.0;
+            maxPrice = 0.0;
+            maxPriceRecordId = 0;
+            minPrice = 0.0;
+            minPriceRecordId = 0;
+            averagePrice = 0.0;
+
+            if (count <= 0)
+            {
+                return false;
+            }
+
+            double priceSum = 0.0;
+            maxPrice = prices[0];
+            maxPriceRecordId = ids[0];
+            minPrice = prices[0];
+            minPriceRecordId = ids[0];
+
+            for (int i = 0; i < count; i++)
+            {
+                double unitDiscounted = prices[i] * (1.0 - discounts[i] / 100.0);
+                discountedStockTotal += unitDiscounted * stockQuantities[i];
+                priceSum += prices[i];
+
+                if (prices[i] > maxPrice)
+                {
+                    maxPrice = prices[i];
+                    maxPriceRecordId = ids[i];
+                }
+
+                if (prices[i] < minPrice)
+                {
+                    minPrice = prices[i];
+                    minPriceRecordId = ids[i];
+                }
+            }
+
+            averagePrice = priceSum / count;
+            return true;
+        }
+
+        static void ShowProductSummary()
+        {
+            if (!CalculateProductSummary(
+                    out int totalRecords,
+                    out double discountedStockTotal,
+                    out double maxPrice,
+                    out int maxPriceRecordId,
+                    out double minPrice,
+                    out int minPriceRecordId,
+                    out double averagePrice))
+            {
+                Console.WriteLine("Сховище порожнє: підсумки обчислити неможливо.");
+                return;
+            }
+
+            Console.WriteLine("=== Підсумки за записами товарів ===");
+            Console.WriteLine($"Кількість записів: {totalRecords}");
+            Console.WriteLine($"Загальна вартість товарів на складі зі знижкою: {discountedStockTotal:F2} грн");
+            Console.WriteLine($"Найбільша ціна: {maxPrice:F2} грн (запис №{maxPriceRecordId})");
+            Console.WriteLine($"Найменша ціна: {minPrice:F2} грн (запис №{minPriceRecordId})");
+            Console.WriteLine($"Середня ціна товару: {averagePrice:F2} грн");
         }
 
         static void AddProduct()
