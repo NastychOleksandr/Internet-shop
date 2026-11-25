@@ -11,6 +11,10 @@ namespace OnlineStore
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
 
+            const int capacity = 100;
+            double[] prices = new double[capacity];
+            int count = 0;
+
             bool running = true;
 
             while (running)
@@ -24,6 +28,28 @@ namespace OnlineStore
                     case "1": ShowAbout(); Pause(); break;
                     case "2": ShowDiscountTable(); Pause(); break;
                     case "3": ShowSalesMatrix(); Pause(); break;
+                    case "4":
+                        double newPrice = ReadDouble("Введіть ціну товару (0..1000000): ", 0, 1000000);
+                        AddPrice(prices, ref count, newPrice, capacity);
+                        Console.WriteLine($"Лічильник count у Main: {count}");
+                        Pause();
+                        break;
+                    case "5": PrintPricesTable(prices, count); Pause(); break;
+                    case "6":
+                        if (count <= 0)
+                        {
+                            Console.WriteLine("Масив порожній, видаляти нічого.");
+                        }
+                        else
+                        {
+                            PrintPricesTable(prices, count);
+                            int indexToRemove = ReadInt($"Введіть номер елемента для видалення (1..{count}): ", 1, count);
+                            RemoveAt(prices, ref count, indexToRemove);
+                        }
+                        Pause();
+                        break;
+                    case "7": PrintStatistics(prices, count); Pause(); break;
+                    case "8": RunTypeExperiment(prices, count); Pause(); break;
                     case "0": running = false; Console.WriteLine("Роботу завершено. До побачення!"); break;
                     default: Console.WriteLine("Немає такого пункту меню. Спробуйте ще раз."); Pause(); break;
                 }
@@ -36,6 +62,11 @@ namespace OnlineStore
             Console.WriteLine("1 — довідка про предметну область");
             Console.WriteLine("2 — табулювання вартості замовлення зі знижкою");
             Console.WriteLine("3 — зведена таблиця продажів за категоріями та днями");
+            Console.WriteLine("4 — додати значення");
+            Console.WriteLine("5 — вивести таблицю значень");
+            Console.WriteLine("6 — видалити за номером");
+            Console.WriteLine("7 — показати статистику");
+            Console.WriteLine("8 — дослід: значимий та посилальний типи");
             Console.WriteLine("0 — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -184,138 +215,139 @@ namespace OnlineStore
 
             PrintSalesSummary(colTotals, grandTotal);
         }
-    }
-}
 
-static void AddPrice(double[] prices, ref int count, double newPrice, int capacity)
-{
-    if (count >= capacity)
-    {
-        Console.WriteLine("Сховище цін заповнене.");
-        return;
-    }
-
-    prices[count] = newPrice;
-    count++;
-}
-
-static void PrintPricesTable(double[] prices, int count)
-{
-    if (count <= 0)
-    {
-        Console.WriteLine("Масив цін порожній.");
-        return;
-    }
-
-    Console.WriteLine($"{"№",5} | {"Ціна (грн)",14}");
-    Console.WriteLine(new string('-', 24));
-
-    for (int i = 0; i < count; i++)
-    {
-        Console.WriteLine($"{i + 1,5} | {prices[i],14:F2}");
-    }
-}
-
-static void TryChangeDiscount(int discount)
-{
-    discount = 50;
-}
-
-static void ApplyFirstPriceMarkup(double[] prices, int count)
-{
-    if (count > 0)
-    {
-        prices[0] = prices[0] + 100.0;
-    }
-}
-
-static void RunTypeExperiment(double[] prices, int count)
-{
-    int discount = 10;
-    Console.WriteLine($"До виклику TryChangeDiscount: discount = {discount}%");
-    TryChangeDiscount(discount);
-    Console.WriteLine($"Після виклику TryChangeDiscount (int без ref): discount = {discount}%");
-
-    if (count > 0)
-    {
-        Console.WriteLine($"\nДо виклику ApplyFirstPriceMarkup: prices[0] = {prices[0]:F2}");
-        ApplyFirstPriceMarkup(prices, count);
-        Console.WriteLine($"Після виклику ApplyFirstPriceMarkup (масив): prices[0] = {prices[0]:F2}");
-    }
-    else
-    {
-        double[] demo = { 250.0, 400.0 };
-        Console.WriteLine($"\nТестовий масив до виклику: demo[0] = {demo[0]:F2}");
-        ApplyFirstPriceMarkup(demo, demo.Length);
-        Console.WriteLine($"Тестовий масив після виклику: demo[0] = {demo[0]:F2}");
-    }
-}
-
-static bool FindMaxPrice(double[] prices, int count, out double maxPrice, out int maxNumber)
-{
-    if (count <= 0)
-    {
-        maxPrice = 0;
-        maxNumber = 0;
-        return false;
-    }
-
-    maxPrice = prices[0];
-    maxNumber = 1;
-
-    for (int i = 1; i < count; i++)
-    {
-        if (prices[i] > maxPrice)
+        static void AddPrice(double[] prices, ref int count, double newPrice, int capacity)
         {
-            maxPrice = prices[i];
-            maxNumber = i + 1;
+            if (count >= capacity)
+            {
+                Console.WriteLine("Сховище цін заповнене.");
+                return;
+            }
+
+            prices[count] = newPrice;
+            count++;
+        }
+
+        static void PrintPricesTable(double[] prices, int count)
+        {
+            if (count <= 0)
+            {
+                Console.WriteLine("Масив цін порожній.");
+                return;
+            }
+
+            Console.WriteLine($"{"№",5} | {"Ціна (грн)",14}");
+            Console.WriteLine(new string('-', 24));
+
+            for (int i = 0; i < count; i++)
+            {
+                Console.WriteLine($"{i + 1,5} | {prices[i],14:F2}");
+            }
+        }
+
+        static void TryChangeDiscount(int discount)
+        {
+            discount = 50;
+        }
+
+        static void ApplyFirstPriceMarkup(double[] prices, int count)
+        {
+            if (count > 0)
+            {
+                prices[0] = prices[0] + 100.0;
+            }
+        }
+
+        static void RunTypeExperiment(double[] prices, int count)
+        {
+            int discount = 10;
+            Console.WriteLine($"До виклику TryChangeDiscount: discount = {discount}%");
+            TryChangeDiscount(discount);
+            Console.WriteLine($"Після виклику TryChangeDiscount (int без ref): discount = {discount}%");
+
+            if (count > 0)
+            {
+                Console.WriteLine($"\nДо виклику ApplyFirstPriceMarkup: prices[0] = {prices[0]:F2}");
+                ApplyFirstPriceMarkup(prices, count);
+                Console.WriteLine($"Після виклику ApplyFirstPriceMarkup (масив): prices[0] = {prices[0]:F2}");
+            }
+            else
+            {
+                double[] demo = { 250.0, 400.0 };
+                Console.WriteLine($"\nТестовий масив до виклику: demo[0] = {demo[0]:F2}");
+                ApplyFirstPriceMarkup(demo, demo.Length);
+                Console.WriteLine($"Тестовий масив після виклику: demo[0] = {demo[0]:F2}");
+            }
+        }
+
+        static bool FindMaxPrice(double[] prices, int count, out double maxPrice, out int maxNumber)
+        {
+            if (count <= 0)
+            {
+                maxPrice = 0;
+                maxNumber = 0;
+                return false;
+            }
+
+            maxPrice = prices[0];
+            maxNumber = 1;
+
+            for (int i = 1; i < count; i++)
+            {
+                if (prices[i] > maxPrice)
+                {
+                    maxPrice = prices[i];
+                    maxNumber = i + 1;
+                }
+            }
+
+            return true;
+        }
+
+        static void CalculateStatistics(double[] prices, int count, out double sum, out double average)
+        {
+            sum = 0;
+            for (int i = 0; i < count; i++)
+            {
+                sum += prices[i];
+            }
+
+            average = count > 0 ? sum / count : 0;
+        }
+
+        static void PrintStatistics(double[] prices, int count)
+        {
+            if (!FindMaxPrice(prices, count, out double maxPrice, out int maxNumber))
+            {
+                Console.WriteLine("Набір порожній: статистики немає.");
+                return;
+            }
+
+            CalculateStatistics(prices, count, out double sum, out double average);
+
+            Console.WriteLine($"Кількість значень: {count}");
+            Console.WriteLine($"Найбільше значення: {maxPrice:F2} (номер: {maxNumber})");
+            Console.WriteLine($"Сума: {sum:F2}");
+            Console.WriteLine($"Середнє: {average:F2}");
+        }
+
+        static void RemoveAt(double[] values, ref int count, int index)
+        {
+            if (index < 1 || index > count)
+            {
+                Console.WriteLine("Помилка: неправильний номер елемента. Змін немає.");
+                return;
+            }
+
+            int pos = index - 1;
+            for (int i = pos; i < count - 1; i++)
+            {
+                values[i] = values[i + 1];
+            }
+
+            values[count - 1] = 0;
+            count--;
+            Console.WriteLine($"Елемент №{index} видалено. Поточний count: {count}");
         }
     }
-
-    return true;
-}
-
-static void CalculateStatistics(double[] prices, int count, out double sum, out double average)
-{
-    sum = 0;
-    for (int i = 0; i < count; i++)
-    {
-        sum += prices[i];
-    }
-
-    average = count > 0 ? sum / count : 0;
-}
-
-static void PrintStatistics(double[] prices, int count)
-{
-    if (!FindMaxPrice(prices, count, out double maxPrice, out int maxNumber))
-    {
-        Console.WriteLine("Набір порожній: статистики немає.");
-        return;
-    }
-
-    CalculateStatistics(prices, count, out double sum, out double average);
-
-    Console.WriteLine($"Кількість значень: {count}");
-    Console.WriteLine($"Найбільше значення: {maxPrice:F2} (номер: {maxNumber})");
-    Console.WriteLine($"Сума: {sum:F2}");
-    Console.WriteLine($"Середнє: {average:F2}");
-}
-static void RemoveAt(double[] values, ref int count, int index)
-{
-    if (index < 1 || index > count)
-    {
-        Console.WriteLine("Помилка: неправильний номер елемента. Змін немає.");
-        return;
-    }
-
-    int pos = index - 1;
-    for (int i = pos; i < count - 1; i++)
-    {
-        values[i] = values[i + 1];
-    }
-
-    values[count - 1] = 0;
-    count--;
-    Console.WriteLine($"Елемент №{index} видалено. Поточний count: {count}");
 }
