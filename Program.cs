@@ -39,17 +39,18 @@ namespace OnlineStore
                 switch (choice)
                 {
                     case "1": AddProduct(); Pause(); break;
-                    case "2": ShowAbout(); Pause(); break;
-                    case "3": ShowDiscountTable(); Pause(); break;
-                    case "4": ShowSalesMatrix(); Pause(); break;
-                    case "5":
+                    case "2": SeedSampleProducts(); Pause(); break;
+                    case "3": ShowAbout(); Pause(); break;
+                    case "4": ShowDiscountTable(); Pause(); break;
+                    case "5": ShowSalesMatrix(); Pause(); break;
+                    case "6":
                         double val = ReadDouble("Введіть значення ціни (0..1000000): ", 0, 1000000);
                         AddSeriesValue(priceSeries, ref seriesCount, val, Capacity);
                         Console.WriteLine($"Лічильник у Main: {seriesCount}");
                         Pause();
                         break;
-                    case "6": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
-                    case "7":
+                    case "7": PrintSeriesTable(priceSeries, seriesCount); Pause(); break;
+                    case "8":
                         if (seriesCount <= 0)
                         {
                             Console.WriteLine("Масив порожній, видаляти нічого.");
@@ -62,8 +63,8 @@ namespace OnlineStore
                         }
                         Pause();
                         break;
-                    case "8": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
-                    case "9": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
+                    case "9": PrintSeriesStatistics(priceSeries, seriesCount); Pause(); break;
+                    case "10": RunTypeExperiment(priceSeries, seriesCount); Pause(); break;
                     case "0": running = false; Console.WriteLine("Роботу завершено. До побачення!"); break;
                     default: Console.WriteLine("Немає такого пункту меню. Спробуйте ще раз."); Pause(); break;
                 }
@@ -74,14 +75,15 @@ namespace OnlineStore
         {
             Console.WriteLine("=== Інтернет-магазин ===");
             Console.WriteLine("1 — додати запис (товар)");
-            Console.WriteLine("2 — довідка про предметну область");
-            Console.WriteLine("3 — табулювання вартості замовлення зі знижкою");
-            Console.WriteLine("4 — зведена таблиця продажів за категоріями та днями");
-            Console.WriteLine("5 — [ЛР9] додати значення у масив");
-            Console.WriteLine("6 — [ЛР9] показати масив значень");
-            Console.WriteLine("7 — [ЛР9] видалити елемент за номером");
-            Console.WriteLine("8 — [ЛР9] показати статистику масиву");
-            Console.WriteLine("9 — [ЛР9] дослід: значимий та посилальний типи");
+            Console.WriteLine("2 — заповнити тестовими записами");
+            Console.WriteLine("3 — довідка про предметну область");
+            Console.WriteLine("4 — табулювання вартості замовлення зі знижкою");
+            Console.WriteLine("5 — зведена таблиця продажів за категоріями та днями");
+            Console.WriteLine("6 — [ЛР9] додати значення у масив");
+            Console.WriteLine("7 — [ЛР9] показати масив значень");
+            Console.WriteLine("8 — [ЛР9] видалити елемент за номером");
+            Console.WriteLine("9 — [ЛР9] показати статистику масиву");
+            Console.WriteLine("10 — [ЛР9] дослід: значимий та посилальний типи");
             Console.WriteLine("0 — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -206,6 +208,61 @@ namespace OnlineStore
             nextId++;
 
             Console.WriteLine($"Додано товар №{ids[count - 1]}.");
+        }
+
+        static void SeedSampleProducts()
+        {
+            string[] sampleArticles = { "ART-001", "ART-002", "ART-003", "ART-004", "ART-005", "ART-006" };
+            string[] sampleNames = { "Механічна клавіатура", "Ігрова миша", "Монітор 27\"", "USB-хаб 4-портовий", "Вебкамера FullHD", "Килимок XL" };
+            int[] sampleCategories = { 1, 1, 2, 3, 2, 3 };
+            double[] samplePrices = { 2600.00, 1350.00, 9400.00, 780.00, 1650.00, 520.00 };
+            double[] sampleDiscounts = { 10.0, 5.0, 15.0, 0.0, 12.0, 20.0 };
+            int[] sampleStocks = { 8, 15, 3, 20, 6, 14 };
+            bool[] sampleInStock = { true, true, true, true, true, false };
+
+            int added = 0;
+
+            for (int i = 0; i < sampleArticles.Length; i++)
+            {
+                if (count == Capacity)
+                {
+                    Console.WriteLine("Сховище заповнене, решту тестових записів не додано.");
+                    break;
+                }
+
+                ids[count] = nextId;
+                articles[count] = sampleArticles[i];
+                names[count] = sampleNames[i];
+                categoryIds[count] = sampleCategories[i];
+                prices[count] = samplePrices[i];
+                discounts[count] = sampleDiscounts[i];
+                stockQuantities[count] = sampleStocks[i];
+                inStockFlags[count] = sampleInStock[i];
+
+                count++;
+                nextId++;
+                added++;
+            }
+
+            Console.WriteLine($"Додано тестових записів: {added}. Усього записів у сховищі: {count}.");
+        }
+
+        static double CalculateTotalStockValue(double[] itemPrices, double[] itemDiscounts, int[] itemStocks, int itemsCount)
+        {
+            if (itemsCount <= 0)
+            {
+                return 0.0;
+            }
+
+            double total = 0.0;
+
+            for (int i = 0; i < itemsCount; i++)
+            {
+                double unitPriceWithDiscount = itemPrices[i] * (1.0 - itemDiscounts[i] / 100.0);
+                total += unitPriceWithDiscount * itemStocks[i];
+            }
+
+            return total;
         }
 
         static double CalculateDiscountedCost(double weight, double basePricePerKg)
